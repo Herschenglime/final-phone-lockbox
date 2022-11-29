@@ -201,6 +201,11 @@ int tempMin = 0;
 int tempSec = 0;
 int count = 0;
 
+//booleans
+bool isPause = true;
+bool isBreak = false;
+bool eStop = false;
+
 LiquidCrystal lcd_1(12, 11, 5, 4, 3, 2);
 
 void setup()
@@ -221,55 +226,42 @@ void setup()
 }
 
 void loop(){
-  pomodoroButton.loop();
-  breakoutButton.loop();
 
-/*
   tempMin = minutes; //stores the initial minutes
   tempSec = seconds; //stores the initial seconds
   count++; //increments count for every time it loops through
-*/
-
-  if (pomodoroButton.isPressed())
-    Serial.println("Pomodoro button pressed");
-
-   if (breakoutButton.isPressed())
-  	Serial.println("ABORT ABORT ABORT");
 
 
-  delay(50);
-
-  /*
   //until button is pressed this will cause the timer to flash
-  while(true){
-    pomodoroButton.loop();
-    breakoutButton.loop();
-
+  if(isPause){
 
     printTime(minutes, seconds);
 
-    delay(750); //pauses to show the minutes
+    responsiveDelay(750); //pauses to show the minutes
 
     lcd_1.clear(); //clears the screen to black
 
-    delay(750); //pauses to show black screen
+    responsiveDelay(750); //pauses to show black screen
 
-      //stand-in emergency releease funcitonality
-    if (breakoutButton.isPressed())
-    Serial.println("ABORT ABORT ABORT");
+  } else { //counts down timer
 
-    if (pomodoroButton.isPressed())
-      Serial.println("Pomodoro button pressed");
+    if(minutes + seconds == 0) { //checks if time ran out
+     isBreak = !isBreak; //changes break state
+     isPause = true; //pauses and begins blinking
+     if(tempMin == 25) //if the inital minutes were 25, switches to 5 for the short break
+    	minutes = 5;
+  	else //if the initial minutes were not 25, it changes it to 25 for the reset time
+    	minutes = 25;
+  	 if (count == 9){ //on the fifth iteration, it becomes a long break
+        minutes = 15;
+        count = -1;
+     }
+    }
 
-    if(pomodoroButton.isPressed())
-      break;
-  }
-
-  while(minutes + seconds > 0){ //as long as the time is not 0,counts down timer
 
     printTime(minutes, seconds);
 
-  	delay(1000); // Wait for 1000 milliseconds
+  	responsiveDelay(1000); // Wait for 1000 milliseconds
 
   	if(seconds == 0){ //resets the seconds to 59 if it hits 0
     	seconds = 59;
@@ -277,25 +269,57 @@ void loop(){
   	}
   	else
   		seconds -= 1;
-  }
-  	if(tempMin == 25) //if the inital minutes were 25, switches to 5 for the short break
-    	minutes = 5;
-  	else //if the initial minutes were not 25, it changes it to 25 for the reset time
-    	minutes = 25;
-  	if (count % 5 == 0) //on the fifth iteration, it becomes a long break
-      minutes = 15;
+    }
+
 }
 
 void printTime(int minutes, int seconds){
   lcd_1.setCursor(0, 0); //sets initial position
 
-  	lcd_1.print(minutes); //prints minutes
+  lcd_1.print(minutes); //prints minutes
 
-  	lcd_1.print(':');
+  lcd_1.print(':');
 
-  	if(seconds < 10) //prints a zero in the tens place if < 10
-    	lcd_1.print('0');
+  if(seconds < 10) //prints a zero in the tens place if < 10
+   	lcd_1.print('0');
 
-  	lcd_1.print(seconds); //prints seconds
-  */
+  lcd_1.print(seconds); //prints seconds
+
+}
+
+//https://forum.arduino.cc/t/button-and-delay-in-loop/42429/3
+void responsiveDelay(unsigned long duration)
+{
+  unsigned long start = millis();
+
+  while (millis() - start <= duration) {
+    handleButtons();  // check the buttons
+
+  }
+
+
+}
+
+
+void handleButtons()
+{
+  pomodoroButton.loop();
+  breakoutButton.loop();
+
+  if (pomodoroButton.isPressed()){
+    Serial.println("Pomodoro button pressed");
+	isPause = !isPause;
+  }
+
+  if (breakoutButton.isPressed()) {
+    isPause = true;
+    isBreak = false;
+    count = 0;
+    minutes = 25;
+    seconds = 0;
+    Serial.println("Emergency Stop Initiated!");
+  }
+
+  //for tinkercad only to make simulation not be really really slow
+  delay(50);
 }
