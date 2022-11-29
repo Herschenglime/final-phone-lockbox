@@ -210,8 +210,8 @@ LiquidCrystal lcd_1(12, 11, 5, 4, 3, 2);
 
 void setup()
 {
-  Serial.begin(9600); //open serial for debugging
-  //servo_9.attach(9, 500, 2500); //initialize servo and set range of motion
+  //Serial.begin(9600); //open serial for debugging
+  servo_9.attach(9, 500, 2500); //initialize servo and set range of motion
   servo_9.attach(9); //initialize servo and set range of motion
 
   //uncomment below on actual hardware
@@ -234,7 +234,7 @@ void loop(){
 
   //until button is pressed this will cause the timer to flash
   if(isPause){
-
+    servo_9.write(0);
     printTime(minutes, seconds);
 
     responsiveDelay(750); //pauses to show the minutes
@@ -244,6 +244,7 @@ void loop(){
     responsiveDelay(750); //pauses to show black screen
 
   } else { //counts down timer
+    servo_9.write(90);
 
     if(minutes + seconds == 0) { //checks if time ran out
      isBreak = !isBreak; //changes break state
