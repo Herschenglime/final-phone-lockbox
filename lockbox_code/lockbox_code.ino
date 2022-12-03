@@ -7,7 +7,7 @@
 //servo functionality
 #include <Servo.h>
 int pos = 0;
-Servo servo_9;
+Servo myservo;
 bool isServoOpen = false;
 
 
@@ -44,8 +44,8 @@ LiquidCrystal lcd_1(12, 11, 5, 4, 3, 2);
 void setup()
 {
   //Serial.begin(9600); //open serial for debugging
-  servo_9.attach(9, 500, 2500); //initialize servo and set range of motion
-  servo_9.attach(9); //initialize servo and set range of motion
+  myservo.attach(9, 500, 2500); //initialize servo and set range of motion
+  myservo.attach(9); //initialize servo and set range of motion
 
   //uncomment below on actual hardware
   //pomodoroButton.setDebounceTime(50);
@@ -71,7 +71,9 @@ void loop(){
   
   //until button is pressed this will cause the timer to flash
   if(isPause){
-    servo_9.write(0);
+
+    openServo();
+    
     printTime(minutes, seconds);
 
     responsiveDelay(750); //pauses to show the minutes
@@ -81,7 +83,8 @@ void loop(){
     responsiveDelay(750); //pauses to show black screen
  
   } else { //counts down timer
-    servo_9.write(90);
+
+    closeServo();
     
     if(minutes + seconds == 0) { //checks if time ran out
       if(!isBreak)
@@ -170,7 +173,7 @@ void handleButtons()
   }
     
   //for tinkercad only to make simulation not be really really slow
-  delay(50);
+//  delay(50);
 }
 
 void breakTune() {
@@ -209,4 +212,26 @@ void eStopTune() {
         tone(piezo, 660, 1000);
           delay(250);
       noTone(piezo);
+}
+
+//code to gradually open the servo so it doesnt have problems
+void openServo() {
+
+      myservo.write(90);
+//    for (pos = 0; pos <= 90; pos += 1) { // goes from 0 degrees to 90 degrees
+//    // in steps of 1 degree
+//    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+////    delay(10);                       // waits 15ms for the servo to reach the position
+//    }
+
+}
+
+void closeServo() {
+
+        myservo.write(0);
+
+//  for (pos = 90; pos >= 0; pos -= 1) { // goes from 90 degrees to 0 degrees
+//    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+////    delay(10);                       // waits 15ms for the servo to reach the position
+//  }
 }
